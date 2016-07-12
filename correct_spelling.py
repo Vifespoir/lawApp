@@ -1,3 +1,5 @@
+"""Spell checker."""
+
 from enchant.checker.CmdLineChecker import CmdLineChecker
 import enchant
 import enchant.checker

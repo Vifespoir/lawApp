@@ -1,3 +1,5 @@
+"""Script to extract law questions and answers from pdf."""
+
 import PyPDF2 as pyPDF
 import re
 
@@ -14,15 +16,9 @@ for page in range(pages):
 
 docContent = ''.join(docContent)
 
-with open('law-words.txt', 'r') as r:
-    WordsToReplace = r.read().split('\n')
-    WordsToReplace = [tuple(w.split(', ')) for w in WordsToReplace if w]
-    print(WordsToReplace)
-    for w in WordsToReplace:
-        docContent = docContent.replace(w[0], w[1])
-
 answers = docContent[docContent.find('Answer Key'):]
 docContent = docContent[:docContent.find('Answer Key')]
+docContent = docContent[docContent.find('1.')-1:]
 answersPattern = re.compile('(\d\d?\.\s\w)')
 answers = answersPattern.findall(answers)
 answers = [tuple(i.split('. ')) for i in answers]
@@ -37,26 +33,25 @@ GibberishPatterns = [('™', "'"), ('ﬁ', '"'), ('ﬂ', '"'), ('(?<=\w)\s*-\s*(
                      ('\s\d*.?MBE Sample Test Questions\s+(\|?\s?\d?)?', ''), ('\s+', ' '),
                      ('\n', ' ')]
 
+with open('law-words.txt', 'r') as r:
+    WordsToReplace = r.read().split('\n')
+    WordsToReplace = [tuple(w.split(', ')) for w in WordsToReplace if w]
+
 
 def replace_patterns(text, patterns):
     """Remove gibberish characters from text."""
-    for pattern in GibberishPatterns:
+    for pattern in patterns:
         text = re.compile(pattern[0]).sub(pattern[1], text)
     return text
 
 cleanQuestions = []
 for q in questions:
     q = replace_patterns(q, GibberishPatterns)
+    for w in WordsToReplace:
+        print(str(w[0]), str(w[1]))
+        q = q.replace(str(w[0]), str(w[1]))
     q = q.strip()
     cleanQuestions.append(q)
-# print(docContent)
-# print(docContent)
-
-if cleanQuestions[0][:3] == '1. ':
-    # print(questions[0][:3])
-    cleanQuestions[0] = cleanQuestions[0][3:]
-    # print(questions[0])
-# print(questions)
 i = 1
 print(len(questions), len(answers))
 
